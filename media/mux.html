@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title>Video Replay</title>
+</head>
+ 
+<body>
+<p class="p1">videos</p>
+
+<!-- Use HLS.js to support the HLS format in browsers. -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://src.litix.io/core/5/mux.js"></script>
+
+<script>
+  window.muxPlayerInitTime = Date.now();
+</script>
+
+<video id="myVideo" controls width="960" height="540" ></video>
+
+<script>
+  // Initialize Mux Data monitoring
+  if (typeof mux !== 'undefined') {
+    var vid = document.querySelector('#myVideo');
+    if (Hls.isSupported()) {
+      var hls = new Hls();
+      hls.loadSource('http://localhost:3000/s5-p5-r9-p15/media.m3u8');
+      hls.attachMedia(vid);
+    }
+    
+    mux.monitor('#myVideo', {
+      debug: true,
+      
+      // Pass in the HLS.js instance
+      hlsjs: hls,
+      
+      // Optionally, if Hls is not available on the window globally
+      // you need to pass Hls as well.
+      Hls: Hls,
+      
+      data: {
+        //env_key: 'lgqu9h0bklqv5nasc5ocpn7gs', // True: 'qat7l569buquui92viuge2cqi', 
+
+        // Metadata
+        player_name: 'Main Player', // ex: 'My Main Player'
+        player_init_time: window.muxPlayerInitTime, // ex: 1451606400000
+        video_id: '12345',
+        video_title: 'Morning Brew',
+        player_name: 'HLS.JS Player',
+
+        // ... and other metadata
+      }
+    });
+  }
+
+</script>
+
+</html>
