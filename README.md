@@ -1,11 +1,9 @@
 # Video DVR
 
-Specify the behavior of the HLS-based video so it has configured playback behavior. 
+Specify the behavior of an HLS-based video so it has the configured playback responses. 
 It is useful for testing player playback behavior and measurement SDKs.
 
 ## Development
-
-This is a Next.js app with MDX (MDX is markdown + react).
 
 1. `git clone`
 1. `yarn install`
