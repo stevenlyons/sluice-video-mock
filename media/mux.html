@@ -4,28 +4,32 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta http-equiv="Content-Style-Type" content="text/css">
   <title>Video Replay</title>
+  <style type="text/css">
+    body {background-color: #000000}
+    a {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Arial; color: #ffffff}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://src.litix.io/core/5/mux.js"></script>
 </head>
- 
+
 <body>
-<p class="p1">videos</p>
-
-<!-- Use HLS.js to support the HLS format in browsers. -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://src.litix.io/core/5/mux.js"></script>
-
-<script>
-  window.muxPlayerInitTime = Date.now();
-</script>
-
+<a href="mux.html?spec=s5-p15">5 second Startup</a> - 
+<a href="mux.html?spec=p5-r9-p30">Rebuffering mid-stream</a> - 
+<a href="mux.html?spec=p15-e404">In-stream 404 error</a>
+<a href="mux.html?spec=p15-r-e">End-of-stream rebuffering</a>
+<br><br>
 <video id="myVideo" controls width="960" height="540" ></video>
 
 <script>
+  const searchParams = new URLSearchParams(window.location.search);
+  const spec = searchParams.get('spec') || 'p5-r9-p30';
+
   // Initialize Mux Data monitoring
   if (typeof mux !== 'undefined') {
     var vid = document.querySelector('#myVideo');
     if (Hls.isSupported()) {
       var hls = new Hls();
-      hls.loadSource('http://localhost:3000/s5-p5-r9-p15/media.m3u8');
+      hls.loadSource('http://localhost:3000/' + spec + '/media.m3u8');
       hls.attachMedia(vid);
     }
     
@@ -40,11 +44,10 @@
       Hls: Hls,
       
       data: {
-        //env_key: 'lgqu9h0bklqv5nasc5ocpn7gs', // True: 'qat7l569buquui92viuge2cqi', 
+        //env_key: ..., 
 
         // Metadata
         player_name: 'Main Player', // ex: 'My Main Player'
-        player_init_time: window.muxPlayerInitTime, // ex: 1451606400000
         video_id: '12345',
         video_title: 'Morning Brew',
         player_name: 'HLS.JS Player',
@@ -55,5 +58,5 @@
   }
 
 </script>
-
+</body>
 </html>
