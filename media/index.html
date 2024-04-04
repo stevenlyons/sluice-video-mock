@@ -28,10 +28,17 @@
   if (typeof mux !== 'undefined') {
     var vid = document.querySelector('#myVideo');
     if (Hls.isSupported()) {
-      var hls = new Hls();
+      var hls = new Hls({ autoStartLoad: false });
       hls.loadSource('http://localhost:3000/' + spec + '/media.m3u8');
       hls.attachMedia(vid);
     }
+
+    function onPlay(event) {
+      hls.startLoad()
+      vid.removeEventListener(opPlay);
+    }
+
+    vid.addEventListener("play", onPlay);
     
     mux.monitor('#myVideo', {
       debug: true,
