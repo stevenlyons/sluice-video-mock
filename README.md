@@ -6,14 +6,14 @@ This is useful for testing video player playback behavior and video player SDK f
 ## Development
 
 1. `git clone`
-1. `yarn install`
+1. `npm install`
 1. `node app.js`
 1. Browse to http://localhost:3000/index.html
 
 ## Testing
 
 ```
-yarn test
+npm test
 ```
 
 Tests cover the pure logic functions in `lib/logic.js` using the Node.js built-in test runner.
