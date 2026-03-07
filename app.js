@@ -56,7 +56,7 @@ app.use(async ctx => {
         const timeline = timelineCache[filepath];
         const time = calculateElapsedPlayheadTime(filename);
 
-        await processSegment(ctx, timeline, time);
+        await processSegment(ctx, timeline, time, filename);
         break;
       default:
         await outputFile(ctx, '/media', filename);
@@ -109,13 +109,14 @@ function generateDashMPD(ctx, mediaLength) {
   outputString(ctx, 'application/dash+xml', mpd);
 }
 
-async function processSegment(ctx, timeline, time) {
+async function processSegment(ctx, timeline, time, requestedFilename) {
   if (!timeline || time === undefined) return;
 
   const segmentNum = Math.ceil(time / segmentLength);
   const segment = timeline.find((el) => el.segment === segmentNum);
 
-  const filename = '0.ts';
+  const ext = path.extname(requestedFilename);
+  const filename = `0${ext}`;
 
   if (segment) {
     // Delayed playback for startup or rebuffer
