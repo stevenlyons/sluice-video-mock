@@ -1,4 +1,4 @@
-video-dvr is a tool that helps simulate internet video playback for use in player integrations. It allows the developer to specify how the video delivery and playback should proceed in order to test and validate behavior of the player. 
+video-dvr helps simulate internet video playback for use in player integration testing. It allows the developer to specify how the video delivery and playback should behave to factilite testing and validation of the player. 
 
 The tool can simulate the following behaviors:
 * Startup time
