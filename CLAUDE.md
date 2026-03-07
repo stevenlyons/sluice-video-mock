@@ -14,7 +14,7 @@ When implementing a TDD, create a git branch using the name of the feature.
 
 Keep track of the TDDs that are implemented in file called FEATURES.md. Add a checkbox for each TDD when it is created. When the TDD is implemented, check the checkbox.  
 
-If changes are made that impact functionality listed in this file, update it.
+If changes are made that impact functionality listed in this file, update the file.
 
 ## Commands
 
