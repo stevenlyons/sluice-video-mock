@@ -8,7 +8,7 @@
   "operations": [
     { "op": "startup",  "delay": 2 },
     { "op": "playback", "time": 30 },
-    { "op": "error",    "code": 404, "rendition": "high" },
-    { "op": "error",    "code": 404, "rendition": "mid" }
+    { "op": "error",    "code": 404, "rendition": "high", "on": "segment" },
+    { "op": "error",    "code": 404, "rendition": "mid", "on": "segment" }
   ]
 }
