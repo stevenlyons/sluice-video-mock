@@ -5,7 +5,7 @@ const path = require('path');
 const throttle = require('koa-throttle2');
 const { segmentLength, shouldIgnoreRequest, checkRequestType,
         extractRenditionName, resolveRenditions, resolveRenditionErrors,
-        parseSpecification, createSegmentTimeline,
+        extractRenditionFromSegment, parseSpecification, createSegmentTimeline,
         calculateElapsedPlayheadTime, calculateMediaLength,
         extractMimetype } = require('./lib/logic');
 
@@ -36,12 +36,13 @@ app.use(async ctx => {
       case 'rendition': {
         console.log('Rendition request');
         const renditionName = extractRenditionName(filename);
-        const renditionError = renditionName && spec.renditionErrors[renditionName];
+        const renditionError = renditionName && spec.renditionErrors.playlist[renditionName];
         if (renditionError) {
           outputError(ctx, renditionError);
         } else {
           const mediaLength = calculateMediaLength(spec.operations);
-          await generateRendition(ctx, mediaLength);
+          const hasSegmentError = renditionName && !!spec.renditionErrors.segment[renditionName];
+          await generateRendition(ctx, mediaLength, renditionName, hasSegmentError);
         }
         break;
       }
@@ -53,6 +54,11 @@ app.use(async ctx => {
       }
       case 'segment': {
         console.log('Segment request');
+        const { rendition: segRendition } = extractRenditionFromSegment(filename);
+        if (segRendition && spec.renditionErrors.segment[segRendition]) {
+          outputError(ctx, spec.renditionErrors.segment[segRendition]);
+          break;
+        }
         if (!timelineCache[filepath]) {
             timelineCache[filepath] = createSegmentTimeline(spec.operations);
             console.log('createSegmentTimeline:');
@@ -85,7 +91,7 @@ async function loadSpecification(filepath) {
     return { operations, renditions: resolveRenditions(json), renditionErrors };
   } catch {
     const operations = parseSpecification(filepath);
-    return { operations, renditions: resolveRenditions({ operations }), renditionErrors: {} };
+    return { operations, renditions: resolveRenditions({ operations }), renditionErrors: { playlist: {}, segment: {} } };
   }
 }
 
@@ -104,7 +110,7 @@ function generateMediaPlaylist(ctx, spec) {
   outputString(ctx, 'application/x-mpegURL', playlist);
 }
 
-function generateRendition(ctx, medialength) {
+function generateRendition(ctx, medialength, renditionName, hasSegmentError) {
   const start =
 `#EXTM3U
 #EXT-X-VERSION:3
@@ -114,9 +120,10 @@ function generateRendition(ctx, medialength) {
   let segments = '';
 
   for (let i = 0; i < medialength / segmentLength; i++) {
+    const segFile = hasSegmentError ? `rendition-${renditionName}-${i}.ts` : `${i}.ts`;
     segments +=
 `\n#EXTINF:5,
-${i}.ts`;
+${segFile}`;
   }
 
   outputString(ctx, 'application/x-mpegURL', start + segments + end);

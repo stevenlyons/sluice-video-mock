@@ -20,7 +20,7 @@ describe('loadSpecification', () => {
 
   it('returns empty renditionErrors for single-rendition spec file', async () => {
     const spec = await loadSpecification('/example');
-    assert.deepEqual(spec.renditionErrors, {});
+    assert.deepEqual(spec.renditionErrors, { playlist: {}, segment: {} });
   });
 
   it('falls back to inline parsing when spec file does not exist', async () => {
@@ -58,7 +58,12 @@ describe('loadSpecification', () => {
 
   it('resolves rendition errors from abr-example', async () => {
     const spec = await loadSpecification('/abr-example');
-    assert.deepEqual(spec.renditionErrors, { low: 404 });
+    assert.deepEqual(spec.renditionErrors, { playlist: { low: 404 }, segment: {} });
+  });
+
+  it('resolves segment rendition errors from abr-rendition-segment-error', async () => {
+    const spec = await loadSpecification('/abr-rendition-segment-error');
+    assert.deepEqual(spec.renditionErrors, { playlist: {}, segment: { low: 503 } });
   });
 
   it('global operations exclude rendition-targeted error ops', async () => {
