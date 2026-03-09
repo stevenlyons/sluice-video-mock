@@ -1,4 +1,4 @@
-# Video DVR
+# Sluice Video Mock
 
 Specify the behavior of an HLS or DASH video stream with configured playback responses.
 This is useful for testing video player playback behavior and video player SDK functionality.
