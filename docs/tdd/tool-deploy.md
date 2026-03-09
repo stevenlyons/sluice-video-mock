@@ -2,12 +2,12 @@
 
 ## Overview
 
-Publish `video-dvr` to npm so developers can run it via `npx` or `bunx` without cloning the repository. Spec files are stored alongside the consuming project's source code and resolved from the working directory at runtime.
+Publish `sluice-video-mock` to npm so developers can run it via `npx` or `bunx` without cloning the repository. Spec files are stored alongside the consuming project's source code and resolved from the working directory at runtime.
 
 ## Goals
 
-- `npx video-dvr` starts the server from any project directory
-- `bunx video-dvr` works identically
+- `npx sluice-video-mock` starts the server from any project directory
+- `bunx sluice-video-mock` works identically
 - Spec JSON files live in the consumer project (e.g., `specs/`) and are committed to their VCS
 - No changes to the URL API or existing spec format
 
@@ -19,10 +19,10 @@ Publish `video-dvr` to npm so developers can run it via `npx` or `bunx` without 
 
 ```json
 {
-  "name": "video-dvr",
+  "name": "sluice-video-mock",
   "version": "0.3.0",
   "bin": {
-    "video-dvr": "./bin/video-dvr.js"
+    "sluice-video-mock": "./bin/sluice-video-mock.js"
   },
   "files": [
     "app.js",
@@ -38,7 +38,7 @@ Publish `video-dvr` to npm so developers can run it via `npx` or `bunx` without 
 
 The `files` array controls what gets published to npm. `specs/` is intentionally omitted — specs come from the consumer project.
 
-### `bin/video-dvr.js`
+### `bin/sluice-video-mock.js`
 
 New thin CLI entry point:
 
@@ -58,7 +58,7 @@ Currently `loadSpecification()` in `app.js` resolves spec files relative to `__d
 ### Resolution Order
 
 1. `--specs <dir>` CLI flag
-2. `VIDEO_DVR_SPECS` environment variable
+2. `SLUICE_SPECS` environment variable
 3. Default: `./specs` relative to `process.cwd()`
 
 If no spec file is found for the requested name, fall back to inline URL parsing (existing behavior, unchanged).
@@ -71,8 +71,8 @@ function resolveSpecsDir() {
   if (flagIndex !== -1 && process.argv[flagIndex + 1]) {
     return path.resolve(process.argv[flagIndex + 1]);
   }
-  if (process.env.VIDEO_DVR_SPECS) {
-    return path.resolve(process.env.VIDEO_DVR_SPECS);
+  if (process.env.SLUICE_SPECS) {
+    return path.resolve(process.env.SLUICE_SPECS);
   }
   return path.join(process.cwd(), 'specs');
 }
@@ -114,30 +114,30 @@ After publishing to npm, a developer integrates the tool as follows:
 
 **Option A — npx (no install)**
 ```bash
-npx video-dvr
-npx video-dvr 8080
-npx video-dvr --specs ./test/fixtures/specs
+npx sluice-video-mock
+npx sluice-video-mock 8080
+npx sluice-video-mock --specs ./test/fixtures/specs
 ```
 
 **Option B — devDependency**
 ```json
 {
   "devDependencies": {
-    "video-dvr": "^0.3.0"
+    "sluice-video-mock": "^0.3.0"
   },
   "scripts": {
-    "dvr": "video-dvr"
+    "mock": "sluice-video-mock"
   }
 }
 ```
 ```bash
-npm run dvr
+npm run mock
 ```
 
 **Option C — Bun**
 ```bash
-bunx video-dvr
-bun run video-dvr  # if installed as devDependency
+bunx sluice-video-mock
+bun run sluice-video-mock  # if installed as devDependency
 ```
 
 **Spec files in the consumer project:**
@@ -165,7 +165,7 @@ New tests to add in `app.test.js`:
 
 - `resolveSpecsDir()` returns `process.cwd()/specs` by default
 - `resolveSpecsDir()` respects `--specs` flag
-- `resolveSpecsDir()` respects `VIDEO_DVR_SPECS` env var
+- `resolveSpecsDir()` respects `SLUICE_SPECS` env var
 - `loadSpecification()` reads from the resolved specs dir (not `__dirname/specs`)
 
 ---
@@ -179,14 +179,14 @@ npm publish         # requires npm login with publish rights
 
 After publish, verify with:
 ```bash
-npx video-dvr@latest --version   # if --version flag is added
-npx video-dvr@latest 3031        # smoke test
+npx sluice-video-mock@latest --version   # if --version flag is added
+npx sluice-video-mock@latest 3031        # smoke test
 ```
 
 ---
 
 ## Open Questions
 
-1. **npm package name** — Is `video-dvr` available on npm, or do we need a scoped name like `@acme/video-dvr`?
+1. **npm package name** — Is `sluice-video-mock` available on npm, or do we need a scoped name like `@acme/sluice-video-mock`?
 2. **`--version` flag** — Should the CLI support `--version` to print the current package version?
 3. **Bun-specific testing** — Do we need to verify Bun compatibility explicitly, or is running under Node sufficient?
