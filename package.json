@@ -1,5 +1,5 @@
 {
-  "name": "video-dvr",
+  "name": "sluice-video-mock",
   "version": "0.2",
   "scripts": {
     "start": "node app.js",
