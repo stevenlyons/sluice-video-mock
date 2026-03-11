@@ -116,7 +116,7 @@ function generateRendition(ctx, medialength, renditionName, hasSegmentError) {
   const start =
 `#EXTM3U
 #EXT-X-VERSION:7
-#EXT-X-TARGETDURATION:6
+#EXT-X-TARGETDURATION:7
 #EXT-X-PLAYLIST-TYPE:VOD
 #EXT-X-INDEPENDENT-SEGMENTS
 #EXT-X-MEDIA-SEQUENCE:0
