@@ -161,10 +161,7 @@ async function processSegment(ctx, timeline, time, requestedFilename) {
   const segment = timeline.find((el) => el.segment === segmentNum);
 
   const ext = path.extname(requestedFilename);
-  const baseName = path.basename(requestedFilename, ext);
-  const namedMatch = baseName.match(/^seg-[a-zA-Z]\w*-(\d+)$/);
-  const plainMatch = baseName.match(/^seg-(\d+)$/);
-  const requestedSegNum = namedMatch ? parseInt(namedMatch[1]) : plainMatch ? parseInt(plainMatch[1]) : NaN;
+  const { segment: requestedSegNum } = extractRenditionFromSegment(path.basename(requestedFilename));
   const NUM_SEGMENTS = 5;
   const filename = isNaN(requestedSegNum)
     ? `seg-1${ext}`
