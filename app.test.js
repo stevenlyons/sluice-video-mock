@@ -112,6 +112,51 @@ describe('mfhd sequence_number patching', () => {
   });
 });
 
+describe('per-rendition segment sizing', () => {
+  // Use abr-sizing-test (playback only, no throttle or errors) so Content-Length is preserved.
+  let server;
+  before(() => new Promise(resolve => {
+    server = http.createServer(app.callback()).listen(0, '127.0.0.1', resolve);
+  }));
+  after(() => new Promise(resolve => server.close(resolve)));
+
+  it('seg-low-1.m4s response body is padded to low rendition target size', async () => {
+    const { statusCode, body } = await get(server, '/abr-sizing-test/seg-low-1.m4s');
+    assert.equal(statusCode, 200);
+    const targetBytes = Math.round(600000 * 6.006 / 8);
+    assert.equal(body.length, targetBytes);
+  });
+
+  it('seg-high-1.m4s response body is padded to high rendition target size', async () => {
+    const { statusCode, body } = await get(server, '/abr-sizing-test/seg-high-1.m4s');
+    assert.equal(statusCode, 200);
+    const targetBytes = Math.round(5000000 * 6.006 / 8);
+    assert.equal(body.length, targetBytes);
+  });
+
+  it('content-length header matches actual body size for low rendition', async () => {
+    const { headers, body } = await get(server, '/abr-sizing-test/seg-low-1.m4s');
+    assert.equal(parseInt(headers['content-length']), body.length);
+  });
+
+  it('content-length header matches actual body size for high rendition', async () => {
+    const { headers, body } = await get(server, '/abr-sizing-test/seg-high-1.m4s');
+    assert.equal(parseInt(headers['content-length']), body.length);
+  });
+
+  it('video data (moof box) is intact at start of low rendition response', async () => {
+    const { body } = await get(server, '/abr-sizing-test/seg-low-1.m4s');
+    const moofOffset = body.slice(4, 8).toString('ascii');
+    assert.equal(moofOffset, 'moof');
+  });
+
+  it('video data (moof box) is intact at start of high rendition response', async () => {
+    const { body } = await get(server, '/abr-sizing-test/seg-high-1.m4s');
+    const moofOffset = body.slice(4, 8).toString('ascii');
+    assert.equal(moofOffset, 'moof');
+  });
+});
+
 describe('loadSpecification', () => {
   it('loads operations from a named spec file', async () => {
     const spec = await loadSpecification('/example');
@@ -154,21 +199,21 @@ describe('loadSpecification', () => {
   it('loads named renditions from abr-example spec file', async () => {
     const spec = await loadSpecification('/abr-example');
     assert.equal(spec.renditions.length, 3);
-    assert.equal(spec.renditions[0].name, 'low');
-    assert.equal(spec.renditions[1].name, 'mid');
-    assert.equal(spec.renditions[2].name, 'high');
+    assert.equal(spec.renditions[0].name, 'mid');
+    assert.equal(spec.renditions[1].name, 'high');
+    assert.equal(spec.renditions[2].name, 'low');
   });
 
   it('loads rendition bandwidths from abr-example', async () => {
     const spec = await loadSpecification('/abr-example');
-    assert.equal(spec.renditions[0].bandwidth, 400000);
-    assert.equal(spec.renditions[1].bandwidth, 2493700);
-    assert.equal(spec.renditions[2].bandwidth, 5000000);
+    assert.equal(spec.renditions[0].bandwidth, 2493700);
+    assert.equal(spec.renditions[1].bandwidth, 5000000);
+    assert.equal(spec.renditions[2].bandwidth, 400000);
   });
 
   it('resolves rendition errors from abr-example', async () => {
     const spec = await loadSpecification('/abr-example');
-    assert.deepEqual(spec.renditionErrors, { playlist: { low: 404 }, segment: {} });
+    assert.deepEqual(spec.renditionErrors, { playlist: { mid: 404 }, segment: { low: 404 } });
   });
 
   it('resolves segment rendition errors from abr-rendition-segment-error', async () => {

@@ -1,0 +1,10 @@
+{
+  "description": "ABR sizing test — multiple renditions, playback only, no throttle or errors",
+  "renditions": [
+    { "name": "low",  "bandwidth": 600000,  "resolution": "640x360" },
+    { "name": "high", "bandwidth": 5000000, "resolution": "1920x1080" }
+  ],
+  "operations": [
+    { "op": "playback", "time": 30 }
+  ]
+}
