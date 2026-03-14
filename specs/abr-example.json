@@ -7,8 +7,7 @@
   ],
   "operations": [
     { "op": "bandwidth", "kbps": 4000 },
-    { "op": "startup", "delay": 5 },
-    { "op": "playback", "time": 12 },
+    { "op": "playback", "time": 6 },
     { "op": "error", "code": 404, "rendition": "mid" },
     { "op": "error", "code": 404, "rendition": "low", "on": "segment" }
   ]
