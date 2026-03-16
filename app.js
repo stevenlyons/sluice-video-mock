@@ -11,6 +11,17 @@ const { segmentLength, shouldIgnoreRequest, checkRequestType,
         extractMimetype, findBox, padSegmentBuffer } = require('./lib/logic');
 const { buildMasterPlaylist, buildRenditionPlaylist, buildDashMPD } = require('./lib/manifest');
 
+function resolveSpecsDir() {
+  const flagIndex = process.argv.indexOf('--specs');
+  if (flagIndex !== -1 && process.argv[flagIndex + 1]) {
+    return path.resolve(process.argv[flagIndex + 1]);
+  }
+  if (process.env.SLUICE_SPECS) {
+    return path.resolve(process.env.SLUICE_SPECS);
+  }
+  return path.join(process.cwd(), 'specs');
+}
+
 // Caches
 let specCache = {};
 let timelineCache = {};
@@ -85,10 +96,11 @@ const port = portFlagIndex !== -1 ? parseInt(process.argv[portFlagIndex + 1]) : 
 if (require.main === module) app.listen(port, () => console.log(`Listening on port ${port}`));
 
 module.exports.loadSpecification = loadSpecification;
+module.exports.resolveSpecsDir = resolveSpecsDir;
 
 async function loadSpecification(filepath) {
   const name = filepath.startsWith('/') ? filepath.substring(1) : filepath;
-  const specFile = path.join(__dirname, 'specs', `${name}.json`);
+  const specFile = path.join(resolveSpecsDir(), `${name}.json`);
   try {
     const contents = await fs.promises.readFile(specFile, 'utf8');
     const json = JSON.parse(contents);

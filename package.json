@@ -1,6 +1,18 @@
 {
   "name": "sluice-mock",
-  "version": "0.2",
+  "version": "0.3.0",
+  "bin": {
+    "sluice-mock": "./bin/sluice-mock.js"
+  },
+  "files": [
+    "app.js",
+    "lib/",
+    "media/",
+    "bin/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node app.js",
     "dev": "node --watch app.js",
