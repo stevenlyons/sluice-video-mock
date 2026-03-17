@@ -73,7 +73,7 @@ app.use(async ctx => {
         }
       }
       if (!timelineCache[filepath]) {
-        timelineCache[filepath] = createSegmentTimeline(spec.operations);
+        timelineCache[filepath] = createSegmentTimeline(spec.timeline);
         console.log('createSegmentTimeline:');
         console.dir(timelineCache[filepath]);
       }
@@ -104,14 +104,14 @@ async function loadSpecification(filepath) {
   try {
     const contents = await fs.promises.readFile(specFile, 'utf8');
     const json = JSON.parse(contents);
-    const operations = json.operations || [];
-    const renditionErrors = resolveRenditionErrors(json.operations);
-    const mediaLength = calculateMediaLength(operations);
-    return { operations, mediaLength, renditions: resolveRenditions(json), renditionErrors };
+    const timeline = json.timeline || [];
+    const renditionErrors = resolveRenditionErrors(json.timeline);
+    const mediaLength = calculateMediaLength(timeline);
+    return { timeline, mediaLength, renditions: resolveRenditions(json), renditionErrors };
   } catch {
-    const operations = parseSpecification(filepath);
-    const mediaLength = calculateMediaLength(operations);
-    return { operations, mediaLength, renditions: resolveRenditions({ operations }), renditionErrors: { playlist: {}, segment: {} } };
+    const timeline = parseSpecification(filepath);
+    const mediaLength = calculateMediaLength(timeline);
+    return { timeline, mediaLength, renditions: resolveRenditions({ timeline }), renditionErrors: { playlist: {}, segment: {} } };
   }
 }
 
