@@ -9,18 +9,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm install        # Install dependencies
+pnpm install       # Install dependencies
 node app.js                  # Start the server (default port 3030)
 node app.js --port 8080      # Start the server on port 8080
 node app.js -p 8080          # Same as --port
 SLUICE_PORT=8080 node app.js # Set port via environment variable
-npm start          # Same as node app.js
+pnpm start         # Same as node app.js
 ```
 
 Tests use the Node.js built-in test runner (`node --test`). Run with:
 
 ```bash
-npm test
+pnpm test
 ```
 
 Test file is colocated with the module it tests: `lib/logic.test.js` covers all pure logic functions in `lib/logic.js`.
