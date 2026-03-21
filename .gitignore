@@ -1,3 +1,6 @@
+**/.DS_Store
+.tool-versions
+
 # Logs
 logs
 *.log
@@ -128,5 +131,3 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-media/.DS_Store
-.DS_Store
