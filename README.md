@@ -1,71 +1,80 @@
-# Sluice Stream Mock
+# Sluice Streaming Media Mock
 
-Specify the behavior of an HLS or DASH stream with configured playback responses.
-This is useful for testing media player playback behavior and player SDK functionality.
+Simulate HLS and DASH stream delivery for testing media player and observability SDK behavior. Configure startup delays, stalls, errors, bandwidth throttling, and multi-rendition ABR scenarios via URL or JSON spec files.
 
-The following behavior can be specified:
-* Playback time
-* Renditions
-* Startup Time delay
-* Stalls (Rebuffering)
-* Errors
+## Installation
 
-## Development
-
-1. `git clone`
-1. `pnpm install`
-1. `node app.js` (or `pnpm dev` for watch mode)
-1. Browse to http://localhost:3030/index.html
-
-## Testing
-
-```
-pnpm test
+```bash
+npm install @wirevice/sluice-mock
 ```
 
-Tests cover the pure logic functions in `lib/logic.js` using the Node.js built-in test runner.
+Then add a script to your `package.json`:
 
-## Usage
+```json
+"scripts": {
+  "mock": "sluice-mock"
+}
+```
 
-You specify video playback behavior by providing a playback specification in the path to the
-video manifest file. A playback manifest will be created and each action will be taken
-for the specified segment.
+## Starting the server
 
-### Spec in url path
+```bash
+npm run mock
+```
 
-A specification in the url path looks something like this: `s5-p30-e404`
+Open the URL `http://localhost:3030/p30/media.m3u8`, or any described below, in a browser or any HLS/DASH player.
 
-Each cue is separated by a `-`. Cues are order-sensitive — position in the string determines when in the timeline each cue fires. The protocol is determined by the manifest extension: `.m3u8` for HLS, `.mpd` for DASH.
+## Configuration
 
-HLS: `http://localhost:3030/s5-p30-e404/media.m3u8`
-DASH: `http://localhost:3030/s5-p30-e404/media.mpd`
+| Method | Port | Specs directory |
+|---|---|---|
+| CLI flag | `--port 8080` or `-p 8080` | `--specs ./my-specs` |
+| Environment variable | `SLUICE_PORT=8080` | `SLUICE_SPECS=./my-specs` |
 
-The following cues are available:
-* Startup Time delay: `s` + delay time (optional, defaults to 5 seconds)
-* Playback: `p` + playback time (optional, defaults to 30 seconds) — rounds up to the nearest segment boundary (~6 seconds)
-* Stall (Rebuffer): `r` + delay time (optional, defaults to 30 seconds)
-  - Note: "stall of X seconds" delays delivery of the segment for X seconds, not wall-clock stall time
-* Error: `e` + error code (optional, defaults to code 500)
+CLI flags and environment variables take precedence in that order. By default the server runs on port `3030` and looks for spec files in the `specs/` directory of the current working directory.
 
-Some examples of playback specifications:
+## Specification
 
-Long startup (5 second startup delay and then regular playback):
-- HLS: `http://localhost:3030/s5-p30/media.m3u8`
-- DASH: `http://localhost:3030/s5-p30/media.mpd`
+A scenario specification describes how stream delivery should behave. Specs can be provided inline in the URL or as named JSON files.
 
-Stalling during the video (10 seconds of playback, 9 seconds of delay, 10 more seconds of playback):
-- HLS: `http://localhost:3030/p10-r9-p10/media.m3u8`
-- DASH: `http://localhost:3030/p10-r9-p10/media.mpd`
+### Inline spec strings
 
-500 Server Error to end the stream:
-- HLS: `http://localhost:3030/p30-e/media.m3u8`
-- DASH: `http://localhost:3030/p30-e/media.mpd`
+Embed a spec directly in the URL path:
 
-### Named Spec Files
+```
+http://localhost:3030/s5-p30-e404/media.m3u8
+http://localhost:3030/s5-p30-e404/media.mpd
+```
 
-Instead of an inline spec string, you can reference a named JSON file stored in the `specs/` directory. This is useful for sharing, versioning, and reusing complex scenarios.
+Cues are separated by `-` and are order-sensitive — position determines when each fires.
 
-Create `specs/my-scenario.json`:
+| Cue | Syntax | Description |
+|---|---|---|
+| Startup delay | `s<N>` | Delay first segment by N seconds (default: 5) |
+| Playback | `p<N>` | Play for N seconds, rounds up to segment boundary (default: 30) |
+| Stall | `r<N>` | Delay a segment by N seconds to simulate rebuffering (default: 30) |
+| Error | `e<code>` | Return HTTP error code (default: 500) |
+
+Examples:
+
+```
+# 5s startup delay, then 30s of playback
+/s5-p30/media.m3u8
+
+# 10s playback, 9s stall, 10s more playback
+/p10-r9-p10/media.m3u8
+
+# 30s playback ending in a 500 error
+/p30-e/media.m3u8
+```
+
+### Named spec files
+
+For complex or reusable scenarios, you can store scenarios in JSON files that can be referenced by name and version controlled. 
+
+Create a `specs/` directory in your project root and add JSON spec files there. Sluice Mock looks for spec files in the `specs/` folder of whichever directory the server is started from. Reference a spec file by name in the URL.
+
+`specs/my-scenario.json`:
 
 ```json
 {
@@ -78,64 +87,42 @@ Create `specs/my-scenario.json`:
 }
 ```
 
-Then reference it by name in the URL:
-
-- HLS: `http://localhost:3030/my-scenario/media.m3u8`
-- DASH: `http://localhost:3030/my-scenario/media.mpd`
+```
+http://localhost:3030/my-scenario/media.m3u8
+http://localhost:3030/my-scenario/media.mpd
+```
 
 If no matching file is found in `specs/`, the path is treated as an inline spec string.
 
-By default the server looks for spec files in the `specs/` directory of the current working directory. You can point it at a different directory using the `--specs` flag or the `SLUICE_SPECS` environment variable:
+### Multiple renditions (ABR)
 
-```bash
-node app.js --specs /path/to/my-specs
-SLUICE_SPECS=/path/to/my-specs node app.js
-```
-
-The port can similarly be configured via CLI flag or environment variable:
-
-```bash
-node app.js --port 8080
-SLUICE_PORT=8080 node app.js
-```
-
-Several example spec files are included in `specs/` to get started: `example.json`, `stall-and-recover.json`, `multiple-stalls.json`, `segment-error.json`, `network-congestion.json`, `abr-example.json`, `abr-rendition-fallback.json`, and `abr-rendition-segment-error.json`.
-
-### Multiple Renditions (ABR)
-
-Named spec files support multiple renditions for testing ABR player behavior. Renditions are named and referenced by name in playlist URLs.
+Named spec files support multiple renditions for testing ABR behavior:
 
 ```json
 {
   "description": "Force player to low rendition, then make it unavailable",
   "renditions": [
-    { "name": "low", "bandwidth": 400000, "resolution": "640x360" },
-    { "name": "mid", "bandwidth": 2493700, "resolution": "1280x720" },
+    { "name": "low",  "bandwidth": 400000,  "resolution": "640x360" },
+    { "name": "mid",  "bandwidth": 2493700, "resolution": "1280x720" },
     { "name": "high", "bandwidth": 5000000, "resolution": "1920x1080" }
   ],
   "timeline": [
     { "cue": "bandwidth", "kbps": 300 },
-    { "cue": "startup", "delay": 5 },
-    { "cue": "playback", "time": 30 },
-    { "cue": "error", "code": 404, "rendition": "low" }
+    { "cue": "startup",   "delay": 5 },
+    { "cue": "playback",  "time": 30 },
+    { "cue": "error",     "code": 404, "rendition": "low" }
   ]
 }
 ```
 
-The master playlist at `/my-scenario/media.m3u8` lists `rendition-low.m3u8`, `rendition-mid.m3u8`, and `rendition-high.m3u8`.
+The master playlist lists `rendition-low.m3u8`, `rendition-mid.m3u8`, and `rendition-high.m3u8`.
 
-**Cues:**
-- `bandwidth` — throttles all segment delivery to the specified kbps; the player's ABR algorithm picks the rendition based on measured throughput
-- `error` with `rendition` — returns an HTTP error when that rendition's playlist is requested, making that quality level unavailable
-- All other cues (`startup`, `playback`, `rebuffer`, `error` without `rendition`) apply globally to segment delivery
-- `playback` time rounds up to the nearest segment boundary (~6 seconds)
+**Rendition cues:**
 
-### Playing
-
-Use the URL, including the desired specification, with your favorite video player.
+* `bandwidth` — throttles all segment delivery to the specified kbps; the player's ABR algorithm picks the rendition
+* `error` with `rendition` — returns an HTTP error when that rendition's playlist is requested, making that quality level unavailable
+* All other cues apply globally to segment delivery
 
 ## Credits
 
-Video sample credit to: 
-Ruvim Miksanskiy
-https://www.pexels.com/video/video-of-forest-1448735/
+Video sample credit to Ruvim Miksanskiy — https://www.pexels.com/video/video-of-forest-1448735/
