@@ -250,7 +250,6 @@ async function processSegment(
 
 function outputError(ctx, code) {
   ctx.status = code;
-  ctx.body = null;
 }
 
 function patchM4sBuffer(buf, sequenceNumber, renditionBandwidth) {
