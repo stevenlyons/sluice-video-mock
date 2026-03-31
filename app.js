@@ -263,7 +263,8 @@ function patchM4sBuffer(buf, sequenceNumber, renditionBandwidth) {
   // 24000 (timescale) * 2.002s (segment duration) = 48048 ticks per segment
   const tfdtOffset = findBox(buf, 'tfdt');
   if (tfdtOffset !== -1) {
-    const decodeTime = BigInt(SEG.mul(24000).toNumber()) * BigInt(sequenceNumber - 1);
+    const decodeTime =
+      BigInt(SEG.mul(24000).toNumber()) * BigInt(sequenceNumber - 1);
     buf.writeBigUInt64BE(decodeTime, tfdtOffset + 12); // version=1, 64-bit field
   }
   if (renditionBandwidth) {
