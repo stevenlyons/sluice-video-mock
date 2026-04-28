@@ -1,0 +1,13 @@
+{
+  "description": "Bandwidth step-down forces player to switch from high to low rendition",
+  "renditions": [
+    { "name": "high", "bandwidth": 4000000, "resolution": "1920x1080" },
+    { "name": "low", "bandwidth": 500000, "resolution": "640x360" }
+  ],
+  "timeline": [
+    { "cue": "bandwidth", "kbps": 9500 },
+    { "cue": "playback", "time": 8 },
+    { "cue": "bandwidth", "kbps": 750 },
+    { "cue": "playback", "time": 6 }
+  ]
+}
